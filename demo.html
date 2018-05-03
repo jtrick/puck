@@ -1,8 +1,47 @@
 <html>
-<head>
-<title>Beacon DEMO</title>
-</head>
-<body>
-<h1>Welcome to the Beacon Demo</h1>
-</body>
+ <head>
+	<title>Beacon DEMO</title>
+	<meta name="viewport" content="width=620, initial-scale=1">
+ </head>
+ <body style="width:620px;height:450px">
+	<link href="https://espruino.github.io/TinyDash/tinydash.css" rel="stylesheet">
+	<script src="https://espruino.github.io/TinyDash/tinydash.js"></script>
+	<script src="https://www.puck-js.com/puck.js"></script>
+	<script>
+	
+	
+	// Connect, and ask for the battery percentage
+	function connectDevice() {
+		Puck.eval("{bat:Puck.getBatteryPercentage()}", function(d,err) {
+			if (!d) { return alert("Web Bluetooth connection failed!\n"+(err||"")); }
+			
+			elements.modal.remove();  // remove the 'connect' window
+			elements.bat.setValue(d.bat);  // update the controls with the values we received
+			Puck.eval("history", function(d) {  // now get the history
+				elements.temp.setData(d);
+			});
+		});
+	}//connectDevice()
+	
+	
+	// Set up the controls we see on the screen		
+	var elements = {
+		heading : TD.label({x:10,y:10,width:190,height:50,label:"My Dashboard"}),
+		bat : TD.gauge({x:10,y:70,width:190,height:220,label:"Battery Level",value:0,min:0,max:100}),
+		temp : TD.graph({x:210,y:10,width:400,height:180,label:"Temperature"}),
+		redled : TD.toggle({x:210,y:200,width:200,height:90,label:"Green LED",value:0,onchange:function(el,v) {
+			Puck.write("LED2.write("+(!!v)+");\n");
+		}}),
+		flash : TD.button({x:420,y:200,width:190,height:90,label:"Flash!",onchange:function(){
+			Puck.write("digitalPulse(LED3,1,500);\n");
+		}}),
+		modal: TD.modal({x:10,y:10,width:600,height:430,label:"Click to connect",onchange:connectDevice})
+	};
+	for (var i in elements)
+		document.body.appendChild(elements[i]);
+		
+	
+	
+	</script>
+ </body>
 </html>
